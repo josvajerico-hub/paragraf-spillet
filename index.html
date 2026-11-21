@@ -192,7 +192,7 @@ const lab=c=>(c.lov==='EMRK'?'Art. ':'§ ')+c.p;
 const store={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},
              set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
 const LAWS=[...new Set(CARDS.map(c=>c.lov))];
-let sel=new Set(store.get('laws',LAWS)), dir=store.get('dir','n2e'), style=store.get('style','pick');
+let sel=new Set(store.get('laws2',['Straffeloven'])), dir=store.get('dir','n2e'), style=store.get('style','pick');
 let miss=store.get('miss',{}), pool=[], cur=null, last=null, right=0, total=0, locked=false, curDir='n2e';
 
 function drawHome(){
@@ -213,7 +213,7 @@ document.querySelectorAll('#styles .seg').forEach(b=>b.onclick=()=>{style=b.data
 
 $('start').onclick=()=>{
   if(!sel.size){sel=new Set(LAWS)}
-  store.set('laws',[...sel]);store.set('dir',dir);store.set('style',style);
+  store.set('laws2',[...sel]);store.set('dir',dir);store.set('style',style);
   pool=CARDS.filter(c=>sel.has(c.lov));
   right=0;total=0;last=null;
   $('home').classList.add('hide');$('game').classList.remove('hide');
