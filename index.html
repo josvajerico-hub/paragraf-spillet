@@ -1,0 +1,292 @@
+<!doctype html>
+<html lang="da">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Paragrafspillet</title>
+<style>
+:root{--bg:#f4f1ea;--card:#fff;--ink:#1d2433;--mute:#6b7280;--accent:#1f4e79;--ok:#1e8e4e;--bad:#c0392b;--line:#d9d4c7}
+@media (prefers-color-scheme:dark){:root{--bg:#14171f;--card:#1e2330;--ink:#eef0f5;--mute:#9aa3b5;--accent:#6fa8dc;--ok:#4cc57e;--bad:#ef6a5b;--line:#323a4d}}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.4 -apple-system,system-ui,sans-serif;padding:max(16px,env(safe-area-inset-top)) 16px max(24px,env(safe-area-inset-bottom))}
+main{max-width:560px;margin:0 auto}
+h1{font-size:26px;margin:8px 0 4px}
+h2{font-size:15px;color:var(--mute);margin:22px 0 8px;text-transform:uppercase;letter-spacing:.05em}
+p.sub{color:var(--mute);margin:0}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip,.opt,.btn{font:inherit;color:var(--ink);background:var(--card);border:2px solid var(--line);border-radius:12px;padding:12px 14px;cursor:pointer}
+.chip{padding:9px 14px;border-radius:99px}
+.chip.on,.seg.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.seg{flex:1}
+.row{display:flex;gap:8px}
+.btn.main{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600;width:100%;margin-top:26px;padding:16px;font-size:19px}
+.btn.small{padding:8px 12px;font-size:15px}
+.top{display:flex;justify-content:space-between;align-items:center;color:var(--mute);font-size:15px}
+.q{background:var(--card);border:2px solid var(--line);border-radius:18px;padding:26px 18px;margin:14px 0;text-align:center}
+.law{color:var(--mute);font-size:15px;margin-bottom:6px}
+.big{font-size:34px;font-weight:700;overflow-wrap:anywhere}
+.title{font-size:26px;font-weight:700}
+.opts{display:grid;gap:10px}
+.opt{text-align:left;width:100%}
+.opt.ok{background:var(--ok);border-color:var(--ok);color:#fff}
+.opt.bad{background:var(--bad);border-color:var(--bad);color:#fff}
+input.ans{font:inherit;font-size:18px;width:100%;padding:14px;border-radius:12px;border:2px solid var(--line);background:var(--card);color:var(--ink)}
+.fb{min-height:48px;margin:12px 0;font-weight:600}
+.fb.ok{color:var(--ok)}.fb.bad{color:var(--bad)}
+.bar{height:6px;background:var(--line);border-radius:3px;margin-top:8px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--accent);width:0}
+.hide{display:none}
+.note{font-size:13px;color:var(--mute);margin-top:30px}
+</style>
+</head>
+<body>
+<main>
+
+<section id="home">
+  <h1>Paragrafspillet</h1>
+  <p class="sub">Lær paragraffer og emner i begge retninger.</p>
+
+  <h2>Love</h2>
+  <div class="chips" id="laws"></div>
+
+  <h2>Hvad skal jeg gætte?</h2>
+  <div class="row" id="dirs">
+    <button class="chip seg on" data-v="n2e">Nummer → emne</button>
+    <button class="chip seg" data-v="e2n">Emne → nummer</button>
+    <button class="chip seg" data-v="mix">Blandet</button>
+  </div>
+
+  <h2>Svar-måde</h2>
+  <div class="row" id="styles">
+    <button class="chip seg on" data-v="pick">Vælg</button>
+    <button class="chip seg" data-v="type">Skriv selv</button>
+  </div>
+
+  <button class="btn main" id="start">Start</button>
+  <p class="note">Kladde: kort med ⚠ er usikre. Kontrollér altid mod retsinformation.dk.</p>
+</section>
+
+<section id="game" class="hide">
+  <div class="top">
+    <button class="btn small" id="quit">← Tilbage</button>
+    <span id="score"></span>
+  </div>
+  <div class="bar"><i id="bar"></i></div>
+  <div class="q"><div class="law" id="law"></div><div id="prompt"></div></div>
+  <div id="answer"></div>
+  <div class="fb" id="fb"></div>
+  <button class="btn main hide" id="next" style="margin-top:0">Næste</button>
+</section>
+
+</main>
+<script>
+/* ===== KORT: [lov, paragraf, emne, (valgfrie andre gyldige svar)] =====
+   Tilføj eller ret kort her. Tekst i parentes ignoreres ved "Skriv selv". */
+const CARDS = [
+ /* STRAFFERET – almindelig del */
+ ["Straffeloven","1","Legalitetsprincippet (ingen straf uden lov)"],
+ ["Straffeloven","13","Nødværge"],
+ ["Straffeloven","14","Nødret"],
+ ["Straffeloven","15","Strafferetlig lavalder (under 15 år)",["lavalder"]],
+ ["Straffeloven","16","Utilregnelighed (sindssygdom m.v.)",["utilregnelighed"]],
+ ["Straffeloven","19","Forsæt som hovedregel (uagtsomhed kun hvis bestemt)",["forsæt"]],
+ ["Straffeloven","21","Forsøg"],
+ ["Straffeloven","23","Medvirken"],
+ ["Straffeloven","56","Betinget dom (udsættelse med fuldbyrdelse)",["betinget dom"]],
+ ["Straffeloven","80","Straffastsættelse (almindelige regler)",["straffastsættelse","strafudmåling"]],
+ ["Straffeloven","81","Skærpende omstændigheder"],
+ ["Straffeloven","82","Formildende omstændigheder"],
+ ["Straffeloven","93","Forældelse af strafansvar",["forældelse"]],
+ /* STRAFFERET – speciel del */
+ ["Straffeloven","119","Vold mod offentligt ansat (tjenestemand)",["vold mod tjenestemand"]],
+ ["Straffeloven","216","Voldtægt"],
+ ["Straffeloven","222","Seksuelt forhold til barn under 15 år",["sex med barn under 15"]],
+ ["Straffeloven","232","Blotteri"],
+ ["Straffeloven","237","Manddrab",["drab","homicide"]],
+ ["Straffeloven","241","Uagtsomt manddrab",["uagtsomt drab"]],
+ ["Straffeloven","244","Simpel vold",["vold"]],
+ ["Straffeloven","245","Grov vold"],
+ ["Straffeloven","246","Særlig grov vold"],
+ ["Straffeloven","252","Farlig adfærd (udsætte andre for fare)",["farlig adfærd"]],
+ ["Straffeloven","260","Ulovlig tvang",["tvang"]],
+ ["Straffeloven","261","Frihedsberøvelse"],
+ ["Straffeloven","266","Trusler",["trussel"]],
+ ["Straffeloven","267","Ærefornærmelse",["injurier"]],
+ ["Straffeloven","268","Bagvaskelse"],
+ ["Straffeloven","276","Tyveri"],
+ ["Straffeloven","278","Underslæb"],
+ ["Straffeloven","279","Bedrageri"],
+ ["Straffeloven","281","Afpresning"],
+ ["Straffeloven","285","Hæleri"],
+ ["Straffeloven","288","Røveri"],
+ ["Straffeloven","291","Hærværk (skade på ting)",["hærværk"]],
+
+ /* STRAFFEPROCES */
+ ["Retsplejeloven","750","Proportionalitet ved tvangsindgreb (straffeproces)",["proportionalitet"],1],
+ ["Retsplejeloven","762","Varetægtsfængsling",["fængsling"],1],
+ ["Retsplejeloven","780","Telefonaflytning (indgreb i meddelelseshemmeligheden)",["telefonaflytning","aflytning"],1],
+ ["Retsplejeloven","793","Ransagning",null,1],
+
+ /* RETSSYSTEMET & JURIDISK METODE */
+ ["Grundloven","3","Magtens tredeling"],
+ ["Grundloven","20","Suverænitetsafgivelse"],
+ ["Grundloven","22","Kongelig stadfæstelse af love",["stadfæstelse"]],
+ ["Grundloven","62","Retsplejen adskilt fra forvaltningen (domstolene)"],
+ ["Grundloven","63","Domstolenes prøvelse af øvrighedens myndighed"],
+ ["Grundloven","64","Dommernes uafhængighed"],
+ ["Grundloven","67","Religionsfrihed"],
+ ["Grundloven","71","Personlig frihed"],
+ ["Grundloven","72","Boligens ukrænkelighed",["boligens ukrænkelighed"]],
+ ["Grundloven","73","Ejendomsretten (ekspropriation)",["ejendomsret","ekspropriation"]],
+ ["Grundloven","77","Ytringsfrihed (censurforbud)",["ytringsfrihed"]],
+ ["Grundloven","78","Foreningsfrihed"],
+ ["Grundloven","79","Forsamlingsfrihed"],
+ ["Grundloven","88","Ændring af grundloven",["grundlovsændring"]],
+ ["EMRK","2","Ret til liv"],
+ ["EMRK","3","Forbud mod tortur"],
+ ["EMRK","5","Ret til frihed og sikkerhed"],
+ ["EMRK","6","Retfærdig rettergang"],
+ ["EMRK","7","Ingen straf uden lov"],
+ ["EMRK","8","Ret til privatliv og familieliv",["privatliv","familieliv"]],
+ ["EMRK","10","Ytringsfrihed"],
+ ["EMRK","11","Forsamlings- og foreningsfrihed"],
+ ["EMRK","13","Ret til effektive retsmidler",["effektive retsmidler"]],
+ ["EMRK","14","Forbud mod diskrimination",["diskrimination"]],
+
+ /* PERSON, FAMILIE- OG ARVERET */
+ ["Arveloven","1","Første arvegruppe (livsarvinger)",["livsarvinger","første arvegruppe"]],
+ ["Arveloven","2","Anden arvegruppe (forældre og søskende)",["anden arvegruppe"],1],
+ ["Arveloven","3","Tredje arvegruppe (bedsteforældre m.fl.)",["tredje arvegruppe"],1],
+ ["Arveloven","5","Livsarvingers tvangsarv",["tvangsarv"]],
+ ["Arveloven","9","Ægtefællens arv (halvdelen sammen med livsarvinger)",["ægtefællens arv"]],
+ ["Arveloven","10","Ægtefællens tvangsarv"],
+ ["Arveloven","17","Uskiftet bo",null,1],
+ ["Arveloven","62","Testationsalder (18 år)",["testationsalder"]],
+ ["Arveloven","63","Notartestamente",null],
+ ["Arveloven","64","Vidnetestamente"],
+ ["Arveloven","65","Nødtestamente"],
+ ["Arveloven","67","Tilbagekaldelse af testamente",["tilbagekaldelse"]],
+ ["Børneloven","1","Moderskab (hende der har født barnet)",["moderskab"],1],
+ ["Børneloven","2","Faderskab hvis moren er gift (pater est)",["faderskab","pater est"],1],
+ ["Ægteskabsloven","1","Betingelser for at indgå ægteskab",null,1]
+].map(([lov,p,titel,alt,u])=>({lov,p,titel,alt:alt||[],u:!!u,key:lov+p}));
+
+/* ===== SPIL ===== */
+const $=id=>document.getElementById(id);
+const lab=c=>(c.lov==='EMRK'?'Art. ':'§ ')+c.p;
+const store={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},
+             set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+const LAWS=[...new Set(CARDS.map(c=>c.lov))];
+let sel=new Set(store.get('laws',LAWS)), dir=store.get('dir','n2e'), style=store.get('style','pick');
+let miss=store.get('miss',{}), pool=[], cur=null, last=null, right=0, total=0, locked=false, curDir='n2e';
+
+function drawHome(){
+  $('laws').innerHTML='';
+  LAWS.forEach(l=>{
+    const b=document.createElement('button');
+    b.className='chip'+(sel.has(l)?' on':'');
+    b.textContent=l;
+    b.onclick=()=>{sel.has(l)?sel.delete(l):sel.add(l);drawHome()};
+    $('laws').appendChild(b);
+  });
+  document.querySelectorAll('#dirs .seg').forEach(b=>b.classList.toggle('on',b.dataset.v===dir));
+  document.querySelectorAll('#styles .seg').forEach(b=>b.classList.toggle('on',b.dataset.v===style));
+}
+document.querySelectorAll('#dirs .seg').forEach(b=>b.onclick=()=>{dir=b.dataset.v;drawHome()});
+document.querySelectorAll('#styles .seg').forEach(b=>b.onclick=()=>{style=b.dataset.v;drawHome()});
+
+$('start').onclick=()=>{
+  if(!sel.size){sel=new Set(LAWS)}
+  store.set('laws',[...sel]);store.set('dir',dir);store.set('style',style);
+  pool=CARDS.filter(c=>sel.has(c.lov));
+  right=0;total=0;last=null;
+  $('home').classList.add('hide');$('game').classList.remove('hide');
+  nextCard();
+};
+$('quit').onclick=()=>{$('game').classList.add('hide');$('home').classList.remove('hide')};
+$('next').onclick=nextCard;
+
+function pickCard(){
+  let list=pool.length>1?pool.filter(c=>c!==last):pool;
+  const w=list.map(c=>1+3*(miss[c.key]||0));
+  let r=Math.random()*w.reduce((a,b)=>a+b,0);
+  for(let i=0;i<list.length;i++){r-=w[i];if(r<=0)return list[i]}
+  return list[list.length-1];
+}
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+
+function nextCard(){
+  locked=false;
+  cur=pickCard();last=cur;
+  curDir=dir==='mix'?(Math.random()<.5?'n2e':'e2n'):dir;
+  $('fb').textContent='';$('fb').className='fb';$('next').classList.add('hide');
+  $('law').textContent=cur.lov+(cur.u?' · ⚠ usikker – tjek':'');
+  $('prompt').innerHTML=curDir==='n2e'
+    ?'<div class="big">'+lab(cur)+'</div>'
+    :'<div class="title">'+cur.titel+'</div>';
+  $('score').textContent=right+' / '+total+' rigtige';
+  $('bar').style.width=total?Math.round(100*right/total)+'%':'0';
+  $('answer').innerHTML='';
+  if(style==='pick')drawOptions();else drawInput();
+}
+
+function drawOptions(){
+  // forkerte svar: helst fra samme lov, ellers fra alle
+  let others=CARDS.filter(c=>c!==cur&&c.lov===cur.lov);
+  if(others.length<3)others=others.concat(CARDS.filter(c=>c!==cur&&c.lov!==cur.lov));
+  const show=c=>curDir==='n2e'?c.titel:lab(c)+(c.lov!==cur.lov?' ('+c.lov+')':'');
+  const seen=new Set([show(cur)]);const wrong=[];
+  shuffle(others).forEach(c=>{const s=show(c);if(wrong.length<3&&!seen.has(s)){seen.add(s);wrong.push(c)}});
+  shuffle([cur,...wrong]).forEach(c=>{
+    const b=document.createElement('button');b.className='opt';b.textContent=show(c);
+    b.dataset.right=c===cur?'1':'';b.onclick=()=>finish(c===cur,b);
+    $('answer').appendChild(b);
+  });
+}
+
+function drawInput(){
+  const i=document.createElement('input');i.className='ans';i.id='inp';
+  i.placeholder=curDir==='n2e'?'Skriv emnet…':'Skriv paragraf-nummer…';
+  i.autocomplete='off';i.autocapitalize='off';i.spellcheck=false;
+  if(curDir==='e2n')i.inputMode='numeric';
+  const b=document.createElement('button');b.className='btn main';b.style.marginTop='12px';b.textContent='Tjek svar';
+  const go=()=>{if(!locked)finish(check(i.value),null)};
+  b.onclick=go;i.onkeydown=e=>{if(e.key==='Enter')go()};
+  $('answer').append(i,b);
+}
+
+const norm=s=>s.toLowerCase().replace(/\(.*?\)/g,'').replace(/[^a-zæøå0-9 ]/g,' ').replace(/\s+/g,' ').trim();
+function lev(a,b){const m=[];for(let i=0;i<=a.length;i++){m[i]=[i]}for(let j=1;j<=b.length;j++)m[0][j]=j;
+  for(let i=1;i<=a.length;i++)for(let j=1;j<=b.length;j++)
+    m[i][j]=Math.min(m[i-1][j]+1,m[i][j-1]+1,m[i-1][j-1]+(a[i-1]===b[j-1]?0:1));
+  return m[a.length][b.length]}
+function check(v){
+  if(curDir==='e2n')return v.toLowerCase().replace(/[^0-9a-z]/g,'').replace(/^(art|paragraf)/,'')===cur.p.toLowerCase();
+  const u=norm(v);if(!u)return false;
+  return [cur.titel,...cur.alt].some(t=>{const n=norm(t);return u===n||lev(u,n)<=(n.length>6?2:1)});
+}
+
+function finish(ok,btn){
+  locked=true;total++;if(ok)right++;
+  miss[cur.key]=ok?Math.max(0,(miss[cur.key]||0)-1):(miss[cur.key]||0)+1;
+  store.set('miss',miss);
+  const ans=curDir==='n2e'?cur.titel:lab(cur);
+  $('fb').className='fb '+(ok?'ok':'bad');
+  $('fb').textContent=ok?'Rigtigt! '+ans:'Forkert. Rigtigt svar: '+ans;
+  if(style==='pick'){
+    document.querySelectorAll('.opt').forEach(o=>{
+      o.disabled=true;
+      if(o.dataset.right)o.classList.add('ok');
+    });
+    if(btn&&!ok)btn.classList.add('bad');
+  } else { const i=$('inp');if(i)i.disabled=true; }
+  $('score').textContent=right+' / '+total+' rigtige';
+  $('bar').style.width=Math.round(100*right/total)+'%';
+  $('next').classList.remove('hide');
+}
+
+drawHome();
+</script>
+</body>
+</html>
