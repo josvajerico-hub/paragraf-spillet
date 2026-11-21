@@ -70,6 +70,8 @@ input.ans{font:inherit;font-size:18px;width:100%;padding:14px;border-radius:12px
   </div>
 
   <button class="btn main" id="start">Start</button>
+  <button class="btn" id="send" style="width:100%;margin-top:10px">Send mine resultater</button>
+  <p class="note" style="margin-top:8px">Åbner en færdigskrevet besked på GitHub. Tryk "Submit new issue", så kan Claude læse dine resultater.</p>
   <p class="note">Kladde: kort med ⚠ er usikre. Kontrollér altid mod retsinformation.dk.</p>
 </section>
 
@@ -197,6 +199,16 @@ const LAWS=[...new Set(CARDS.map(c=>c.lov))];
 let sel=new Set(store.get('laws2',['Straffeloven'])), dir=store.get('dir','n2e'), style=store.get('style','pick');
 let miss=store.get('miss',{}), pool=[], cur=null, last=null, right=0, total=0, locked=false, curDir='n2e';
 
+function resultsText(){
+  const d=new Date().toISOString().slice(0,10);
+  const rows=CARDS.filter(c=>stats[c.key]).map(c=>{const s=stats[c.key];
+    return c.lov+' '+lab(c)+' '+c.titel.split(' (')[0]+': '+s.r+' rigtige, '+s.w+' forkerte, '+(streak[c.key]||0)+' i træk'});
+  return 'Resultater '+d+'\n\n'+(rows.length?rows.join('\n'):'Ingen svar endnu.');
+}
+$('send').onclick=()=>{
+  const url='https://github.com/josvajerico-hub/paragraf-spillet/issues/new?title='+encodeURIComponent('Resultater '+new Date().toISOString().slice(0,10))+'&body='+encodeURIComponent(resultsText());
+  window.open(url,'_blank')||(location.href=url);
+};
 function drawHome(){
   $('sems').innerHTML=SEMINARS.map(s=>'<b>Seminar '+s.nr+' – '+s.titel+'</b><span>'+s.paras.map(([l,p])=>'§ '+p).join(', ')+' ('+s.paras[0][0]+')</span>').join('<br>');
   $('laws').innerHTML='';
@@ -228,6 +240,7 @@ $('next').onclick=nextCard;
 
 const MASTER=3; // antal rigtige i træk før et kort er "lært" og ikke vises mere
 let streak=store.get('streak',{});
+let stats=store.get('stats',{}); // {kort-nøgle:{r:rigtige,w:forkerte}}
 const learned=c=>(streak[c.key]||0)>=MASTER;
 function pickCard(){
   let list=pool;
@@ -306,6 +319,7 @@ function finish(ok,btn){
   miss[cur.key]=ok?Math.max(0,(miss[cur.key]||0)-1):(miss[cur.key]||0)+1;
   store.set('miss',miss);
   streak[cur.key]=ok?(streak[cur.key]||0)+1:0;store.set('streak',streak);
+  const st=stats[cur.key]||(stats[cur.key]={r:0,w:0});ok?st.r++:st.w++;store.set('stats',stats);
   const ans=curDir==='n2e'?cur.titel:lab(cur);
   $('fb').className='fb '+(ok?'ok':'bad');
   $('fb').textContent=ok?'Rigtigt! '+ans:'Forkert. Rigtigt svar: '+ans;
