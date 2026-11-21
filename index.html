@@ -104,13 +104,13 @@ const CARDS = [
  ["Straffeloven","82","Formildende omstændigheder"],
  ["Straffeloven","93","Forældelse af strafansvar",["forældelse"]],
  /* STRAFFERET – speciel del */
- ["Straffeloven","119","Vold mod offentligt ansat (tjenestemand)",["vold mod tjenestemand"]],
+ ["Straffeloven","119","Vold og trusler mod person i offentlig tjeneste eller hverv",["vold mod offentligt ansat","vold mod tjenestemand"]],
  ["Straffeloven","121","Hån eller skældsord mod offentligt ansat under tjeneste",["hån mod tjenestemand","fornærmelig tiltale af offentligt ansat"]],
  ["Straffeloven","180","Brandstiftelse (fare for liv eller omfattende ødelæggelse)",["brandstiftelse"]],
  ["Straffeloven","216","Voldtægt"],
  ["Straffeloven","263","Krænkelse af brevhemmelighed og lign. (stk. 2, nr. 1: åbne breve)",["brevbrud","brevhemmelighed"]],
  ["Straffeloven","222","Seksuelt forhold til barn under 15 år",["sex med barn under 15"]],
- ["Straffeloven","232","Blotteri"],
+ ["Straffeloven","232","Blufærdighedskrænkelse",["blotteri","blufærdighed"]],
  ["Straffeloven","237","Manddrab",["drab","homicide"]],
  ["Straffeloven","241","Uagtsomt manddrab",["uagtsomt drab"]],
  ["Straffeloven","244","Simpel vold",["vold"]],
@@ -120,13 +120,13 @@ const CARDS = [
  ["Straffeloven","260","Ulovlig tvang",["tvang"]],
  ["Straffeloven","261","Frihedsberøvelse"],
  ["Straffeloven","266","Trusler",["trussel"]],
- ["Straffeloven","267","Ærefornærmelse",["injurier"]],
+ ["Straffeloven","267","Ærekrænkelse",["injurier","ærefornærmelse"]],
  ["Straffeloven","268","Bagvaskelse"],
  ["Straffeloven","276","Tyveri"],
  ["Straffeloven","278","Underslæb"],
  ["Straffeloven","279","Bedrageri"],
  ["Straffeloven","281","Afpresning"],
- ["Straffeloven","285","Hæleri"],
+ ["Straffeloven","290","Hæleri"],
  ["Straffeloven","288","Røveri"],
  ["Straffeloven","291","Hærværk (skade på ting)",["hærværk"]],
 
@@ -178,7 +178,8 @@ const CARDS = [
  ["Børneloven","1","Moderskab (hende der har født barnet)",["moderskab"],1],
  ["Børneloven","2","Faderskab hvis moren er gift (pater est)",["faderskab","pater est"],1],
  ["Ægteskabsloven","1","Betingelser for at indgå ægteskab",null,1]
-].map(([lov,p,titel,alt,u])=>({lov,p,titel,alt:alt||[],u:!!u,key:lov+p}));
+].map(([lov,p,titel,alt,u])=>({lov,p,titel,alt:alt||[],u:!!u||lov!=='Straffeloven',key:lov+p}));
+/* Straffeloven er kontrolleret mod lovteksten (danskelove.dk). Alle andre love er IKKE kontrolleret. */
 
 /* ===== SEMINARER: tilføj nye seminarer her (lov + paragraffer) ===== */
 const SEMINARS = [
@@ -236,7 +237,7 @@ function nextCard(){
   cur=pickCard();last=cur;
   curDir=dir==='mix'?(Math.random()<.5?'n2e':'e2n'):dir;
   $('fb').textContent='';$('fb').className='fb';$('next').classList.add('hide');
-  $('law').textContent=[cur.lov,...semOf(cur)].join(' · ')+(cur.u?' · ⚠ usikker – tjek':'');
+  $('law').textContent=[cur.lov,...semOf(cur)].join(' · ')+(cur.u?' · ⚠ ikke kontrolleret – tjek':' · ✓ kontrolleret');
   $('prompt').innerHTML=curDir==='n2e'
     ?'<div class="big">'+lab(cur)+'</div>'
     :'<div class="title">'+cur.titel+'</div>';
