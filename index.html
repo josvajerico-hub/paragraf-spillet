@@ -208,7 +208,7 @@ function drawHome(){
     $('laws').appendChild(b);
   });
   const chosen=CARDS.filter(c=>sel.has(c.lov));
-  $('prog').textContent='Lært: '+chosen.filter(learned).length+' af '+chosen.length+' paragraffer (3 rigtige i træk = lært)';
+  $('prog').textContent='Lært: '+chosen.filter(learned).length+' af '+chosen.length+' paragraffer (3 rigtige i træk = lært, vises så sjældnere)';
   document.querySelectorAll('#dirs .seg').forEach(b=>b.classList.toggle('on',b.dataset.v===dir));
   document.querySelectorAll('#styles .seg').forEach(b=>b.classList.toggle('on',b.dataset.v===style));
 }
@@ -230,11 +230,10 @@ const MASTER=3; // antal rigtige i træk før et kort er "lært" og ikke vises m
 let streak=store.get('streak',{});
 const learned=c=>(streak[c.key]||0)>=MASTER;
 function pickCard(){
-  let list=pool.filter(c=>!learned(c));
-  if(!list.length)return null;
+  let list=pool;
   if(list.length>1)list=list.filter(c=>c!==last);
-  // nye kort vægtes 2, kort du har svaret forkert på vægtes højere
-  const w=list.map(c=>streak[c.key]===undefined&&!miss[c.key]?2:1+3*(miss[c.key]||0));
+  // lærte kort vises sjældent (0.6), nye kort 2, kort du svarer forkert på vægtes højere
+  const w=list.map(c=>learned(c)?0.6:streak[c.key]===undefined&&!miss[c.key]?2:1+3*(miss[c.key]||0));
   let r=Math.random()*w.reduce((a,b)=>a+b,0);
   for(let i=0;i<list.length;i++){r-=w[i];if(r<=0)return list[i]}
   return list[list.length-1];
