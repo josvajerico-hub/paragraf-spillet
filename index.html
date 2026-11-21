@@ -37,6 +37,8 @@ input.ans{font:inherit;font-size:18px;width:100%;padding:14px;border-radius:12px
 .bar{height:6px;background:var(--line);border-radius:3px;margin-top:8px;overflow:hidden}
 .bar i{display:block;height:100%;background:var(--accent);width:0}
 .hide{display:none}
+.sems{background:var(--card);border:2px solid var(--line);border-radius:12px;padding:12px 14px;font-size:15px}
+.sems b{display:block}.sems span{color:var(--mute)}
 .note{font-size:13px;color:var(--mute);margin-top:30px}
 </style>
 </head>
@@ -49,6 +51,9 @@ input.ans{font:inherit;font-size:18px;width:100%;padding:14px;border-radius:12px
 
   <h2>Love</h2>
   <div class="chips" id="laws"></div>
+
+  <h2>Seminarer med i spillet</h2>
+  <div id="sems" class="sems"></div>
 
   <h2>Hvad skal jeg gætte?</h2>
   <div class="row" id="dirs">
@@ -175,6 +180,12 @@ const CARDS = [
  ["Ægteskabsloven","1","Betingelser for at indgå ægteskab",null,1]
 ].map(([lov,p,titel,alt,u])=>({lov,p,titel,alt:alt||[],u:!!u,key:lov+p}));
 
+/* ===== SEMINARER: tilføj nye seminarer her (lov + paragraffer) ===== */
+const SEMINARS = [
+ {nr:1, titel:"Introduktion til strafferet", paras:[["Straffeloven","119"],["Straffeloven","121"],["Straffeloven","180"],["Straffeloven","263"],["Straffeloven","276"]]}
+];
+const semOf=c=>SEMINARS.filter(s=>s.paras.some(([l,p])=>l===c.lov&&p===c.p)).map(s=>'Seminar '+s.nr);
+
 /* ===== SPIL ===== */
 const $=id=>document.getElementById(id);
 const lab=c=>(c.lov==='EMRK'?'Art. ':'§ ')+c.p;
@@ -185,6 +196,7 @@ let sel=new Set(store.get('laws',LAWS)), dir=store.get('dir','n2e'), style=store
 let miss=store.get('miss',{}), pool=[], cur=null, last=null, right=0, total=0, locked=false, curDir='n2e';
 
 function drawHome(){
+  $('sems').innerHTML=SEMINARS.map(s=>'<b>Seminar '+s.nr+' – '+s.titel+'</b><span>'+s.paras.map(([l,p])=>'§ '+p).join(', ')+' ('+s.paras[0][0]+')</span>').join('<br>');
   $('laws').innerHTML='';
   LAWS.forEach(l=>{
     const b=document.createElement('button');
@@ -224,7 +236,7 @@ function nextCard(){
   cur=pickCard();last=cur;
   curDir=dir==='mix'?(Math.random()<.5?'n2e':'e2n'):dir;
   $('fb').textContent='';$('fb').className='fb';$('next').classList.add('hide');
-  $('law').textContent=cur.lov+(cur.u?' · ⚠ usikker – tjek':'');
+  $('law').textContent=[cur.lov,...semOf(cur)].join(' · ')+(cur.u?' · ⚠ usikker – tjek':'');
   $('prompt').innerHTML=curDir==='n2e'
     ?'<div class="big">'+lab(cur)+'</div>'
     :'<div class="title">'+cur.titel+'</div>';
