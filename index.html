@@ -102,6 +102,19 @@ const CARDS = [
  ["Straffeloven","21","Forsøg"],
  ["Straffeloven","23","Medvirken"],
  ["Straffeloven","56","Betinget dom (udsættelse med fuldbyrdelse)",["betinget dom"]],
+ ["Straffeloven","57","Vilkår ved betinget dom",["vilkår"]],
+ ["Straffeloven","69","Foranstaltning i stedet for straf (psykisk afvigende)",["foranstaltning"]],
+ ["Straffeloven","79","Frakendelse af erhvervsret",["frakendelse"]],
+ ["Straffeloven","83","Nedsættelse eller bortfald af straf",["strafnedsættelse","strafbortfald"]],
+ ["Straffeloven","88","Fællesstraf for flere lovovertrædelser (sammenstød)",["fællesstraf","sammenstød"]],
+ ["Straffeloven","139","Krænkelse af gravfreden",["gravfred"]],
+ ["Straffeloven","171","Brug af falsk dokument (dokumentfalsk)",["dokumentfalsk"]],
+ ["Straffeloven","224","Købssex med person under 18 år"],
+ ["Straffeloven","225","Andet seksuelt forhold end samleje",["andet seksuelt forhold"]],
+ ["Straffeloven","264 d","Videregivelse af private meddelelser eller billeder",["videregivelse af private forhold","nøgenbilleder"]],
+ ["Straffeloven","286","Skærpet straf for grov vinding (formueforbrydelser)",["grov vinding"]],
+ ["Straffeloven","293","Uberettiget brug af andres ting (brugstyveri)",["brugstyveri"]],
+ ["Straffeloven","293 a","Brugstyveri af motorkøretøj",["brugstyveri af bil"]],
  ["Straffeloven","80","Straffastsættelse (almindelige regler)",["straffastsættelse","strafudmåling"]],
  ["Straffeloven","81","Skærpende omstændigheder"],
  ["Straffeloven","82","Formildende omstændigheder"],
@@ -111,7 +124,7 @@ const CARDS = [
  ["Straffeloven","121","Hån eller skældsord mod offentligt ansat under tjeneste",["hån mod tjenestemand","fornærmelig tiltale af offentligt ansat"]],
  ["Straffeloven","180","Brandstiftelse (fare for liv eller omfattende ødelæggelse)",["brandstiftelse"]],
  ["Straffeloven","216","Voldtægt"],
- ["Straffeloven","263","Krænkelse af brevhemmelighed og lign. (stk. 2, nr. 1: åbne breve)",["brevbrud","brevhemmelighed"]],
+ ["Straffeloven","263","Uberettiget adgang til data, brevåbning og skjult aflytning",["brevåbning","skjult aflytning","datasystem","brevbrud"]],
  ["Straffeloven","222","Seksuelt forhold til barn under 15 år",["sex med barn under 15"]],
  ["Straffeloven","232","Blufærdighedskrænkelse",["blotteri","blufærdighed"]],
  ["Straffeloven","237","Manddrab",["drab","homicide"]],
@@ -186,7 +199,11 @@ const CARDS = [
 
 /* ===== SEMINARER: tilføj nye seminarer her (lov + paragraffer) ===== */
 const SEMINARS = [
- {nr:1, titel:"Introduktion til strafferet", paras:[["Straffeloven","119"],["Straffeloven","121"],["Straffeloven","180"],["Straffeloven","263"],["Straffeloven","276"]]}
+ {nr:1, titel:"Introduktion til strafferet", paras:[["Straffeloven","119"],["Straffeloven","121"],["Straffeloven","180"],["Straffeloven","263"],["Straffeloven","276"]]},
+ {nr:2, titel:"Straffeteorier, retsstridighedslære og kriminalisering", paras:[["Straffeloven","224"],["Straffeloven","276"]]},
+ {nr:15, titel:"Objektive straffrihedsgrunde", paras:[["Straffeloven","13"],["Straffeloven","14"],["Straffeloven","83"],["Straffeloven","237"],["Straffeloven","276"]]},
+ {nr:16, titel:"Samtykke og vildfarelser", paras:[["Straffeloven","222"],["Straffeloven","232"],["Straffeloven","244"],["Straffeloven","245"],["Straffeloven","264 d"],["Straffeloven","291"],["Straffeloven","293"],["Straffeloven","293 a"]]},
+ {nr:21, titel:"Straffastsættelsen", paras:[["Straffeloven","16"],["Straffeloven","21"],["Straffeloven","56"],["Straffeloven","57"],["Straffeloven","69"],["Straffeloven","79"],["Straffeloven","88"],["Straffeloven","139"],["Straffeloven","171"],["Straffeloven","225"],["Straffeloven","263"],["Straffeloven","264 d"],["Straffeloven","279"],["Straffeloven","281"],["Straffeloven","286"],["Straffeloven","293 a"]]}
 ];
 const semOf=c=>SEMINARS.filter(s=>s.paras.some(([l,p])=>l===c.lov&&p===c.p)).map(s=>'Seminar '+s.nr);
 
@@ -309,7 +326,7 @@ function lev(a,b){const m=[];for(let i=0;i<=a.length;i++){m[i]=[i]}for(let j=1;j
     m[i][j]=Math.min(m[i-1][j]+1,m[i][j-1]+1,m[i-1][j-1]+(a[i-1]===b[j-1]?0:1));
   return m[a.length][b.length]}
 function check(v){
-  if(curDir==='e2n')return v.toLowerCase().replace(/[^0-9a-z]/g,'').replace(/^(art|paragraf)/,'')===cur.p.toLowerCase();
+  if(curDir==='e2n')return v.toLowerCase().replace(/[^0-9a-z]/g,'').replace(/^(art|paragraf)/,'')===cur.p.toLowerCase().replace(/[^0-9a-z]/g,'');
   const u=norm(v);if(!u)return false;
   return [cur.titel,...cur.alt].some(t=>{const n=norm(t);return u===n||lev(u,n)<=(n.length>6?2:1)});
 }
