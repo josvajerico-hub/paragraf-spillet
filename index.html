@@ -54,7 +54,7 @@ input.ans{font:inherit;font-size:18px;width:100%;padding:14px;border-radius:12px
   <p class="sub" id="prog" style="margin-top:10px"></p>
 
   <h2>Seminarer med i spillet</h2>
-  <div id="sems" class="sems"></div>
+  <details class="sems"><summary>Se seminarer 1–27 og deres paragraffer</summary><div id="sems"></div></details>
 
   <h2>Hvad skal jeg gætte?</h2>
   <div class="row" id="dirs">
@@ -96,7 +96,6 @@ const CARDS = [
  ["Straffeloven","1","Legalitetsprincippet (ingen straf uden lov)"],
  ["Straffeloven","13","Nødværge"],
  ["Straffeloven","14","Nødret"],
- ["Straffeloven","15","Strafferetlig lavalder (under 15 år)",["lavalder"]],
  ["Straffeloven","16","Utilregnelighed (sindssygdom m.v.)",["utilregnelighed"]],
  ["Straffeloven","19","Forsæt som hovedregel (uagtsomhed kun hvis bestemt)",["forsæt"]],
  ["Straffeloven","21","Forsøg"],
@@ -131,26 +130,39 @@ const CARDS = [
  ["Straffeloven","241","Uagtsomt manddrab",["uagtsomt drab"]],
  ["Straffeloven","244","Simpel vold",["vold"]],
  ["Straffeloven","245","Grov vold"],
- ["Straffeloven","246","Særlig grov vold"],
  ["Straffeloven","252","Farlig adfærd (udsætte andre for fare)",["farlig adfærd"]],
  ["Straffeloven","260","Ulovlig tvang",["tvang"]],
- ["Straffeloven","261","Frihedsberøvelse"],
  ["Straffeloven","266","Trusler",["trussel"]],
- ["Straffeloven","267","Ærekrænkelse",["injurier","ærefornærmelse"]],
- ["Straffeloven","268","Bagvaskelse"],
  ["Straffeloven","276","Tyveri"],
- ["Straffeloven","278","Underslæb"],
  ["Straffeloven","279","Bedrageri"],
  ["Straffeloven","281","Afpresning"],
- ["Straffeloven","290","Hæleri"],
  ["Straffeloven","288","Røveri"],
  ["Straffeloven","291","Hærværk (skade på ting)",["hærværk"]],
 
- /* STRAFFEPROCES */
- ["Retsplejeloven","750","Proportionalitet ved tvangsindgreb (straffeproces)",["proportionalitet"],1],
- ["Retsplejeloven","762","Varetægtsfængsling",["fængsling"],1],
- ["Retsplejeloven","780","Telefonaflytning (indgreb i meddelelseshemmeligheden)",["telefonaflytning","aflytning"],1],
- ["Retsplejeloven","793","Ransagning",null,1],
+ ["Straffeloven","6","Straffemyndighed: handlinger i Danmark og på danske skibe"],
+ ["Straffeloven","7","Straffemyndighed: handlinger i udlandet (dansk tilknytning)"],
+ ["Straffeloven","8","Straffemyndighed: handlinger uden for Danmark (statens interesser m.v.)"],
+ ["Straffeloven","9","Hvor en handling anses for begået (gerningssted)",["gerningssted"]],
+ ["Straffeloven","9 a","Udenlandsk materiale tilgængeligt i Danmark"],
+ ["Straffeloven","68","Foranstaltninger efter frifindelse (§ 16)",["foranstaltninger efter frifindelse"]],
+ ["Straffeloven","70","Forvaring (betingelser)",["forvaring"]],
+ ["Straffeloven","81 a","Forhøjet straf ved gruppekonflikter"],
+ ["Straffeloven","81 c","Forhøjet straf i skærpet strafzone",["skærpet strafzone"]],
+ ["Straffeloven","93 b","Ingen forældelse (folkeretlige forbrydelser m.m.)"],
+ ["Straffeloven","122","Bestikkelse (at give)",["aktiv bestikkelse"]],
+ ["Straffeloven","123","Pression eller chikane mod vidner",["vidnepression"]],
+ ["Straffeloven","135","Ugrundet påkaldelse af hjælp (falsk alarm)",["falsk alarm"]],
+ ["Straffeloven","136","Offentlig opfordring til forbrydelse",["offentlig tilskyndelse"]],
+ ["Straffeloven","144","Bestikkelse (at modtage)",["passiv bestikkelse"]],
+ ["Straffeloven","158","Falsk forklaring for retten",["falsk forklaring"]],
+ ["Straffeloven","159","Straffrihed for sigtedes falske forklaring"],
+ ["Straffeloven","163","Urigtig erklæring til brug i retsforhold"],
+ ["Straffeloven","192 a","Grov overtrædelse af våbenlovgivningen",["våben"]],
+ ["Straffeloven","235","Udbredelse af seksuelt børnemateriale",["børneporno"]],
+ ["Straffeloven","238","Mors drab på nyfødt barn"],
+ ["Straffeloven","240","Medvirken til selvmord"],
+ ["Straffeloven","243","Psykisk vold i husstand",["psykisk vold"]],
+ ["Straffeloven","276 a","Indbrudstyveri"],
 
  /* RETSSYSTEMET & JURIDISK METODE */
  ["Grundloven","3","Magtens tredeling"],
@@ -201,11 +213,34 @@ const CARDS = [
 const SEMINARS = [
  {nr:1, titel:"Introduktion til strafferet", paras:[["Straffeloven","119"],["Straffeloven","121"],["Straffeloven","180"],["Straffeloven","263"],["Straffeloven","276"]]},
  {nr:2, titel:"Straffeteorier, retsstridighedslære og kriminalisering", paras:[["Straffeloven","224"],["Straffeloven","276"]]},
+ {nr:3, titel:"Legalitetsprincippet (§ 1)", paras:[["Straffeloven","1"],["Straffeloven","68"],["Straffeloven","123"],["Straffeloven","144"],["Straffeloven","163"],["Straffeloven","235"],["Straffeloven","244"],["Straffeloven","260"],["Straffeloven","276"]]},
+ {nr:4, titel:"Legalitetsprincippet i EMRK artikel 7", paras:[["EMRK","7"],["Straffeloven","1"],["Straffeloven","82"],["Straffeloven","93"],["Straffeloven","243"]]},
+ {nr:5, titel:"Ansvarssubjektet", paras:[["Straffeloven","70"]]},
+ {nr:6, titel:"Tilregnelse – forsæt", paras:[["Straffeloven","19"],["Straffeloven","237"],["Straffeloven","245"],["Straffeloven","252"],["Straffeloven","281"]]},
+ {nr:7, titel:"Tilregnelse – uagtsomhed og objektivt ansvar", paras:[["Straffeloven","241"]]},
+ {nr:8, titel:"Tilregnelse – vildfarelser", paras:[["Straffeloven","82"]]},
+ {nr:9, titel:"Forsøg I", paras:[["Straffeloven","21"]]},
+ {nr:10, titel:"Forsøg II", paras:[["Straffeloven","21"],["Straffeloven","276 a"]]},
+ {nr:11, titel:"Forsøg, frivillig tilbagetræden", paras:[["Straffeloven","237"],["Straffeloven","276"],["Straffeloven","293"],["Straffeloven","276 a"]]},
+ {nr:12, titel:"Strafbar medvirken I", paras:[["Straffeloven","23"],["Straffeloven","158"],["Straffeloven","159"],["Straffeloven","288"]]},
+ {nr:13, titel:"Strafbar medvirken II", paras:[["Straffeloven","119"],["Straffeloven","158"],["Straffeloven","240"],["Straffeloven","244"],["Straffeloven","245"]]},
+ {nr:14, titel:"Strafbar medvirken III", paras:[["Straffeloven","1"],["Straffeloven","23"],["Straffeloven","136"],["Straffeloven","238"],["Straffeloven","288"],["Straffeloven","192 a"]]},
  {nr:15, titel:"Objektive straffrihedsgrunde", paras:[["Straffeloven","13"],["Straffeloven","14"],["Straffeloven","83"],["Straffeloven","237"],["Straffeloven","276"]]},
- {nr:16, titel:"Samtykke og vildfarelser", paras:[["Straffeloven","222"],["Straffeloven","232"],["Straffeloven","244"],["Straffeloven","245"],["Straffeloven","264 d"],["Straffeloven","291"],["Straffeloven","293"],["Straffeloven","293 a"]]},
- {nr:21, titel:"Straffastsættelsen", paras:[["Straffeloven","16"],["Straffeloven","21"],["Straffeloven","56"],["Straffeloven","57"],["Straffeloven","69"],["Straffeloven","79"],["Straffeloven","88"],["Straffeloven","139"],["Straffeloven","171"],["Straffeloven","225"],["Straffeloven","263"],["Straffeloven","264 d"],["Straffeloven","279"],["Straffeloven","281"],["Straffeloven","286"],["Straffeloven","293 a"]]}
+ {nr:16, titel:"Samtykke og vildfarelser", paras:[["Straffeloven","222"],["Straffeloven","232"],["Straffeloven","244"],["Straffeloven","245"],["Straffeloven","291"],["Straffeloven","264 d"],["Straffeloven","293 a"]]},
+ {nr:17, titel:"Forældelse", paras:[["Straffeloven","1"],["Straffeloven","232"],["Straffeloven","93 b"]]},
+ {nr:18, titel:"Dansk straffemyndighed", paras:[["Straffeloven","6"],["Straffeloven","7"],["Straffeloven","8"],["Straffeloven","9"],["Straffeloven","9 a"]]},
+ {nr:19, titel:"Straffastsættelsen I", paras:[["Straffeloven","80"],["Straffeloven","81"],["Straffeloven","82"],["Straffeloven","119"],["Straffeloven","135"],["Straffeloven","266"],["Straffeloven","276"]]},
+ {nr:20, titel:"Straffastsættelsen II", paras:[["Straffeloven","82"],["Straffeloven","83"],["Straffeloven","122"],["Straffeloven","237"],["Straffeloven","244"],["Straffeloven","245"],["Straffeloven","266"],["Straffeloven","279"],["Straffeloven","81 a"],["Straffeloven","81 c"]]},
+ {nr:21, titel:"Straffastsættelsen III", paras:[["Straffeloven","16"],["Straffeloven","21"],["Straffeloven","57"],["Straffeloven","68"],["Straffeloven","69"],["Straffeloven","79"],["Straffeloven","88"],["Straffeloven","139"],["Straffeloven","171"],["Straffeloven","216"],["Straffeloven","224"],["Straffeloven","225"],["Straffeloven","263"],["Straffeloven","279"],["Straffeloven","281"],["Straffeloven","286"],["Straffeloven","264 d"],["Straffeloven","293 a"]]},
+ {nr:22, titel:"Straffeproces: efterforskning (Retsplejeloven – ikke kontrolleret endnu)", paras:[]},
+ {nr:23, titel:"Tvangsindgreb og agentvirksomhed (Retsplejeloven – ikke kontrolleret endnu)", paras:[]},
+ {nr:24, titel:"Påtale, tiltale, tilståelse (Retsplejeloven – ikke kontrolleret endnu)", paras:[]},
+ {nr:25, titel:"Hovedforhandling I (Retsplejeloven – ikke kontrolleret endnu)", paras:[]},
+ {nr:26, titel:"Hovedforhandling II", paras:[["Straffeloven","252"]]},
+ {nr:27, titel:"Bevisbyrde, bevisførelse og bevisbedømmelse", paras:[["Straffeloven","180"],["Straffeloven","276 a"]]}
 ];
-const semOf=c=>SEMINARS.filter(s=>s.paras.some(([l,p])=>l===c.lov&&p===c.p)).map(s=>'Seminar '+s.nr);
+
+const semOf=c=>{const n=SEMINARS.filter(s=>s.paras.some(([l,p])=>l===c.lov&&p===c.p)).map(s=>s.nr);return n.length?['Seminar '+n.join(', ')]:[]};
 
 /* ===== SPIL ===== */
 const $=id=>document.getElementById(id);
@@ -227,7 +262,7 @@ $('send').onclick=()=>{
   window.open(url,'_blank')||(location.href=url);
 };
 function drawHome(){
-  $('sems').innerHTML=SEMINARS.map(s=>'<b>Seminar '+s.nr+' – '+s.titel+'</b><span>'+s.paras.map(([l,p])=>'§ '+p).join(', ')+' ('+s.paras[0][0]+')</span>').join('<br>');
+  $('sems').innerHTML=SEMINARS.map(s=>'<b>Seminar '+s.nr+' – '+s.titel+'</b><span>'+(s.paras.length?s.paras.map(([l,p])=>(l==='EMRK'?'Art. ':'§ ')+p).join(', '):'ingen paragraffer i spillet endnu')+'</span>').join('<br>');
   $('laws').innerHTML='';
   LAWS.forEach(l=>{
     const b=document.createElement('button');
